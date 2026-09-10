@@ -6,6 +6,27 @@
 
 若以上链接失效，请戳这里：[apk下载](https://github.com/HurTeng/StormPlane/raw/master/app/release/app-release.apk)
 
+## 🌐 HTML5 强化美术版（`web/`）
+
+![StormPlane HTML5](web/docs/preview.jpg)
+
+仓库新增 `web/` 目录：**零构建、零依赖**的原生 ES Module 重制版。战斗数值全部沿用原版
+`GameConstant`（血量、伤害、分数、出场门槛、BOSS 阈值与四状态编排等均未修改），而机体、弹幕、
+场景、爆炸特效、HUD 与音效则全部重写——程序化矢量绘制 + 粒子 + 泛光后处理 + WebAudio 合成配乐，
+任意分辨率下都清晰，并且不加载任何图片素材。
+
+```bash
+cd web && node server.mjs 8123        # 或：python3 -m http.server 8123
+# 浏览器打开 http://localhost:8123/
+```
+
+- **经典模式**：数值与出怪节奏与 Android 原版完全一致
+- **风暴模式**：敌群更密、弹幕更华丽、判定更宽松（伤害/血量/分数/阈值仍取原版常量）
+- 支持鼠标跟随 / 触屏拖拽 / 键盘三种操控，画质与音效可在设置面板内切换
+- 数据对照表、加强清单与「原版代码 Bug 修正」逐条说明见 [web/README.md](web/README.md)
+
+Android 工程（`app/`）、`res/` 原版素材与本 README 的其余章节均保持不变。
+
 
 # 游戏说明
 

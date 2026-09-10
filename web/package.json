@@ -1,0 +1,13 @@
+{
+  "name": "stormplane-web",
+  "version": "1.0.0",
+  "description": "《沙漠风暴 StormPlane》HTML5 重制版 —— 原版数据 + 程序化强化美术",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node server.mjs",
+    "render:check": "node tools/render-check.mjs"
+  },
+  "license": "Apache-2.0"
+}

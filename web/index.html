@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+<meta name="theme-color" content="#0b0806" />
+<meta name="description" content="《沙漠风暴 StormPlane》HTML5 重制版：保留 Android 原版全部战斗数据，美术与手感全面强化。" />
+<title>沙漠风暴 StormPlane · HTML5 强化美术版</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>✈️</text></svg>" />
+<link rel="stylesheet" href="./css/style.css" />
+</head>
+<body>
+<div id="app">
+  <!-- 背景层：标题页美术 + 动态沙尘 -->
+  <div class="bg-art" id="bgArt"></div>
+  <div class="bg-scan" aria-hidden="true"></div>
+
+  <main class="stage">
+    <!-- 左侧信息栏（宽屏可见） -->
+    <aside class="side side-left">
+      <div class="brand">
+        <div class="brand-mark">✈</div>
+        <div>
+          <h1 class="brand-name">沙漠风暴</h1>
+          <p class="brand-sub">STORMPLANE · HTML5 REMASTER</p>
+        </div>
+      </div>
+      <p class="side-note">
+        纵版射击 · 要塞突击。战斗数值与出怪节奏完全沿用 Android 原版
+        <code>GameConstant</code>，机体、弹幕、场景则全部改为程序化矢量重绘。
+      </p>
+      <ul class="spec-list" id="specList">
+        <li><b>生命</b><span id="spLife">5 / 9</span></li>
+        <li><b>导弹</b><span id="spMissile">5 / 9</span></li>
+        <li><b>等级</b><span id="spLevel">1 → 6（每 50000 分升一级）</span></li>
+        <li><b>敌机</b><span id="spEnemy">小 1HP · 中 40HP · 大 120HP · BOSS 1000HP</span></li>
+        <li><b>积分</b><span id="spScore">小 100 · 中 300 · 大 800 · BOSS 2000</span></li>
+      </ul>
+      <div class="side-foot">
+        <button class="ghost-btn" data-open="help">玩法说明</button>
+        <button class="ghost-btn" data-open="settings">设置</button>
+      </div>
+    </aside>
+
+    <!-- 游戏画面 -->
+    <section class="screen-shell">
+      <div class="frame" id="frame">
+        <canvas id="game" width="480" height="800"></canvas>
+
+        <!-- 标题页 -->
+        <div class="panel panel-title is-on" data-screen="title">
+          <div class="title-glow"></div>
+          <h2 class="game-title"><span>沙漠风暴</span></h2>
+          <p class="game-sub">STORMPLANE <i>HTML5</i> 强化美术版</p>
+
+          <div class="mode-picker" role="radiogroup" aria-label="模式选择">
+            <button class="mode is-on" data-mode="classic" role="radio" aria-checked="true">
+              <b>经典模式</b><i>原版数值 · 原版节奏</i>
+            </button>
+            <button class="mode" data-mode="storm" role="radio" aria-checked="false">
+              <b>风暴模式</b><i>敌群更密 · 判定更宽松</i>
+            </button>
+          </div>
+
+          <button class="primary-btn" id="btnStart">
+            <span>开始飞行</span><em>ENTER</em>
+          </button>
+
+          <div class="title-meta">
+            <div class="best">
+              <small>最高分</small><b id="bestScore">0</b>
+            </div>
+            <div class="quick-btns">
+              <button class="ghost-btn" data-open="help">玩法</button>
+              <button class="ghost-btn" data-open="settings">设置</button>
+            </div>
+          </div>
+          <p class="hint" id="titleHint">移动：鼠标 / 手指拖拽 / WASD　·　导弹：空格或点击左下按钮</p>
+        </div>
+
+        <!-- 暂停 -->
+        <div class="panel panel-pause" data-screen="pause">
+          <h3>暂 停</h3>
+          <div class="pause-stats" id="pauseStats"></div>
+          <button class="primary-btn" data-act="resume"><span>继续</span><em>P</em></button>
+          <div class="row-btns">
+            <button class="ghost-btn" data-act="restart">重新开始</button>
+            <button class="ghost-btn" data-open="settings">设置</button>
+            <button class="ghost-btn" data-act="quit">回到标题</button>
+          </div>
+        </div>
+
+        <!-- 结算 -->
+        <div class="panel panel-over" data-screen="over">
+          <p class="over-kicker" id="overKicker">MISSION FAILED</p>
+          <h3 class="over-title">战机失联</h3>
+          <div class="over-score"><small>本局积分</small><b id="overScore">0</b></div>
+          <div class="over-grid" id="overGrid"></div>
+          <p class="over-rank" id="overRank"></p>
+          <div class="row-btns">
+            <button class="primary-btn wide" data-act="restart"><span>再来一局</span><em>ENTER</em></button>
+            <button class="ghost-btn" data-act="quit">回到标题</button>
+          </div>
+        </div>
+
+        <!-- 玩法说明 -->
+        <div class="panel panel-help" data-screen="help">
+          <h3>玩法说明</h3>
+          <div class="scroll">
+            <section>
+              <h4>操作</h4>
+              <p>战机自动开火，只需操控走位。可用<b>鼠标跟随</b>、<b>手指拖拽</b>或 <b>WASD/方向键</b>；
+                <b>空格</b>（或点左下按钮）引爆导弹，<b>P / Esc</b> 暂停。</p>
+            </section>
+            <section>
+              <h4>我方战机的三种形态</h4>
+              <ul class="cards">
+                <li><i class="sw sw-blue"></i><b>蓝色激光粒子弹</b><span>威力 1，直线射击；特殊弹夹耗尽后自动回到该形态。</span></li>
+                <li><i class="sw sw-purple"></i><b>紫色双螺旋粒子炮</b><span>威力 4，双发齐射，弹道螺旋，持续 15 秒。</span></li>
+                <li><i class="sw sw-red"></i><b>红色追踪战斧</b><span>威力 5，单发速射，全屏追击，持续 15 秒。</span></li>
+              </ul>
+            </section>
+            <section>
+              <h4>敌机</h4>
+              <ul class="cards">
+                <li><b>小型机</b><span>1 HP · 100 分。蛇形飘移，等级越高横摆越猛，注意别撞机。</span></li>
+                <li><b>中型机</b><span>40 HP · 300 分。先减速悬停再垂直俯冲，3 级起俯冲速度暴涨，出现红圈即为俯冲预警。</span></li>
+                <li><b>大型机</b><span>120 HP · 800 分。成群推进形成肉墙，发射「烈焰飘雪」；4 级起装甲转红、提速反向摆动。</span></li>
+                <li><b>BOSS</b><span>1000 HP · 2000 分。按血量 700 / 500 / 150 依次进入愤怒、疯狂、极限状态。</span></li>
+              </ul>
+            </section>
+            <section>
+              <h4>BOSS 的四个状态</h4>
+              <ul class="cards">
+                <li><b>普通</b><span>在屏幕上方左右移动，喷射连续火焰阵。</span></li>
+                <li><b>愤怒</b><span>下潜到 2/3 屏高形成前后夹击，向上抛射闪光粒子球与悬浮三角。</span></li>
+                <li><b>疯狂</b><span>全屏斜向机动 + 全方位扫射，速度 20+3×等级。</span></li>
+                <li><b>极限</b><span>装甲过载闪烁，速度 30+5×等级，沙地地狱火持续喷发。</span></li>
+              </ul>
+            </section>
+            <section>
+              <h4>道具（积分门槛与原版一致）</h4>
+              <ul class="cards">
+                <li><i class="sw sw-purple"></i><b>紫色弹夹</b><span>3000 分后出现，切换双螺旋粒子炮。</span></li>
+                <li><i class="sw sw-red"></i><b>红色弹夹</b><span>7000 分后出现，切换追踪战斧。</span></li>
+                <li><i class="sw sw-gold"></i><b>导弹</b><span>5000 分后出现，上限 9 发，全屏造成 80 伤害并使敌方停火 0.5 秒。</span></li>
+                <li><i class="sw sw-green"></i><b>生命</b><span>10000 分后出现，生命 +1（上限 9），归零则任务失败。</span></li>
+              </ul>
+            </section>
+            <section>
+              <h4>关于本版改动</h4>
+              <p>美术（机体、弹幕、场景、特效、音效）全部重写；<b>战斗数值未改</b>。
+                风暴模式只加密出怪编排与弹幕密度，伤害 / 血量 / 分数 / 阈值仍取原版常量。
+                另有若干处「原版笔误」的修正，详见 <code>README.md</code> 的 Web 章节。</p>
+            </section>
+          </div>
+          <button class="ghost-btn" data-act="close">返回</button>
+        </div>
+
+        <!-- 设置 -->
+        <div class="panel panel-settings" data-screen="settings">
+          <h3>设 置</h3>
+          <div class="scroll">
+            <section class="set-group">
+              <h4>画面</h4>
+              <label class="set-row"><span>泛光辉光</span>
+                <select data-set="bloom">
+                  <option value="0">关闭</option>
+                  <option value="1">标准</option>
+                  <option value="2">浓烈</option>
+                </select>
+              </label>
+              <label class="set-row"><span>粒子密度</span>
+                <select data-set="quality">
+                  <option value="0">精简</option>
+                  <option value="1">标准</option>
+                  <option value="2">华丽</option>
+                </select>
+              </label>
+              <label class="set-row"><span>屏幕震动</span><input type="checkbox" data-set="shake" /></label>
+              <label class="set-row"><span>命中顿帧</span><input type="checkbox" data-set="hitstop" /></label>
+              <label class="set-row"><span>高清渲染</span><input type="checkbox" data-set="hidpi" /></label>
+            </section>
+            <section class="set-group">
+              <h4>手感</h4>
+              <label class="set-row"><span>控制方式</span>
+                <select data-set="control">
+                  <option value="auto">自动（触屏拖拽 / 鼠标跟随）</option>
+                  <option value="abs">始终跟随指针</option>
+                  <option value="rel">始终相对拖拽</option>
+                </select>
+              </label>
+              <label class="set-row"><span>机动性 <i>机体速度 30 像素/帧 ×</i></span>
+                <select data-set="agility">
+                  <option value="1">1.0（原版）</option>
+                  <option value="1.6">1.6</option>
+                  <option value="2.2">2.2</option>
+                </select>
+              </label>
+              <label class="set-row"><span>受击判定 <i>原版为整机矩形</i></span>
+                <select data-set="hitbox">
+                  <option value="1">100%（原版）</option>
+                  <option value="0.75">75%</option>
+                  <option value="0.55">55%（显示判定点）</option>
+                </select>
+              </label>
+            </section>
+            <section class="set-group">
+              <h4>声音</h4>
+              <label class="set-row"><span>音效</span><input type="checkbox" data-set="sfx" /></label>
+              <label class="set-row"><span>配乐（随等级递进）</span><input type="checkbox" data-set="music" /></label>
+              <p class="set-note">全部音效与配乐由 WebAudio 实时合成，不加载任何音频文件。</p>
+            </section>
+            <section class="set-group">
+              <h4>调试</h4>
+              <label class="set-row"><span>显示帧率 / 实体数</span><input type="checkbox" data-set="fps" /></label>
+            </section>
+          </div>
+          <button class="ghost-btn" data-act="close">返回</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 右侧信息栏（宽屏可见） -->
+    <aside class="side side-right">
+      <div class="live-card">
+        <div class="live-row"><small>积分</small><b id="liveScore">0</b></div>
+        <div class="live-row"><small>等级</small><b id="liveLevel">1</b></div>
+        <div class="live-row"><small>生命</small><b id="liveLife">5</b></div>
+        <div class="live-row"><small>导弹</small><b id="liveMissile">5</b></div>
+        <div class="live-row"><small>连击</small><b id="liveCombo">0</b></div>
+      </div>
+      <div class="kill-card">
+        <h4>击落统计</h4>
+        <div class="kill-row"><span>小型机</span><b id="kSmall">0</b><i>×100</i></div>
+        <div class="kill-row"><span>中型机</span><b id="kMiddle">0</b><i>×300</i></div>
+        <div class="kill-row"><span>大型机</span><b id="kBig">0</b><i>×800</i></div>
+        <div class="kill-row"><span>BOSS</span><b id="kBoss">0</b><i>×2000</i></div>
+      </div>
+      <p class="side-note small">
+        本作是 <a href="https://github.com/HurTeng/StormPlane" target="_blank" rel="noopener">HurTeng/StormPlane</a>
+        的 HTML5 重制：Android 工程与原版素材保持不变。
+      </p>
+    </aside>
+  </main>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
