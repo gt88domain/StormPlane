@@ -103,12 +103,13 @@ web/
 
 ```bash
 cd web && npm i -D @napi-rs/canvas   # 仅开发依赖，不进入游戏包体
+node --version                        # 需要 Node 18+
 node tools/render-check.mjs  # 烘焙全部精灵并输出总览图
 node tools/sim-check.mjs     # 离线跑对局：出怪 / 三形态 / BOSS 四状态 / 导弹 / 坠机
 node tools/dom-check.mjs     # DOM 垫片驱动的冒烟测试：启动→操控→设置→结算→重开
 ```
 
-三个脚本默认输出到 `/home/user/preview`（可通过参数指定），用于在无浏览器环境下核对美术与逻辑。
+三个脚本都只依赖开发用的 `@napi-rs/canvas`，缺依赖时会打印安装提示后退出。默认输出到 `web/preview/`（已在 `.gitignore` 中），也可传参指定别的目录——用于在没有浏览器的环境里核对美术与逻辑。
 
 ## 许可
 

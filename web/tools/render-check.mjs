@@ -3,13 +3,14 @@
  * 用法：node web/tools/render-check.mjs [输出目录]
  * 需要 @napi-rs/canvas（临时安装即可，未纳入项目依赖）。
  */
-import { createRequire } from 'node:module';
 import { existsSync, mkdirSync } from 'node:fs';
+import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { createCanvas, loadImage } from '@napi-rs/canvas';
+import { loadCanvas, OUT_DEFAULT } from './_boot.mjs';
 
-const require = createRequire(import.meta.url);
-const outDir = process.argv[2] || '/home/user/preview';
+const createCanvas = await loadCanvas();
+const { loadImage } = await import('@napi-rs/canvas');
+const outDir = process.argv[2] || OUT_DEFAULT;
 mkdirSync(outDir, { recursive: true });
 
 const src = path.resolve(import.meta.dirname, '../src');
@@ -69,7 +70,7 @@ for (const b of bosses) {
   bx += s.w * 2 + 30;
 }
 await Promise.all([
-  require('node:fs').promises.writeFile(path.join(outDir, 'sprites.png'), sheet.toBuffer('image/png')),
+  writeFile(path.join(outDir, 'sprites.png'), sheet.toBuffer('image/png')),
 ]);
 console.log('sprites ->', path.join(outDir, 'sprites.png'));
 
@@ -81,7 +82,7 @@ console.log('sprites ->', path.join(outDir, 'sprites.png'));
   g.resize(480, 800, 1);
   g.state = 'idle';
   for (let i = 0; i < 160; i++) { g.tick(16.7); g.render(); }
-  await require('node:fs').promises.writeFile(path.join(outDir, 'title-attract.png'), c.toBuffer('image/png'));
+  await writeFile(path.join(outDir, 'title-attract.png'), c.toBuffer('image/png'));
   console.log('title-attract ->', path.join(outDir, 'title-attract.png'));
 }
 
@@ -97,6 +98,6 @@ if (bg.Background) {
   b.build?.();
   b.update?.(100, 1);
   b.draw?.(bgCtx, 0, 400);
-  await require('node:fs').promises.writeFile(path.join(outDir, 'background.png'), bgView.toBuffer('image/png'));
+  await writeFile(path.join(outDir, 'background.png'), bgView.toBuffer('image/png'));
   console.log('background ->', path.join(outDir, 'background.png'));
 }

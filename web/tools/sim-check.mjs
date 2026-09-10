@@ -1,15 +1,16 @@
 /**
  * sim-check.mjs —— 无浏览器环境下的整帧回归：跑模拟 + 出图，验证渲染管线与逻辑
  */
-import { createCanvas } from '@napi-rs/canvas';
 import { mkdirSync, writeFileSync } from 'node:fs';
+import { loadCanvas, SRC, outDir } from './_boot.mjs';
 
-const out = process.argv[2] || '/home/user/preview';
+const out = outDir(2);
 mkdirSync(out, { recursive: true });
-const u = await import('/home/user/StormPlane/web/src/util.js');
+const createCanvas = await loadCanvas();
+const u = await import(SRC('util.js'));
 u.setCanvasFactory((w, h) => createCanvas(Math.max(1, w | 0), Math.max(1, h | 0)));
 
-const { Game } = await import('/home/user/StormPlane/web/src/game.js');
+const { Game } = await import(SRC('game.js'));
 const canvas = createCanvas(480, 800);
 const game = new Game(canvas, { audio: null, ss: 2, quality: 1 });
 game.resize(480, 800, 1);
