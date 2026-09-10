@@ -133,6 +133,18 @@ body {
 }
 body.is-menu #game {
   cursor: default;
+  opacity: .82;
+  filter: saturate(.92) brightness(.92);
+}
+
+/* 结算/暂停时战场压暗，突出面板 */
+body.is-menu .frame::after,
+body.state-pause .frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(120% 80% at 50% 46%, rgba(8, 5, 3, 0) 20%, rgba(8, 5, 3, .5) 100%);
 }
 
 /* ---------------- 侧栏 ---------------- */
